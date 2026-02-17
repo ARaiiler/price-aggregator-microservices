@@ -6,7 +6,6 @@ pipeline {
     
     environment {
         // Docker registry credentials (configure in Jenkins)
-        DOCKER_REGISTRY = credentials('docker-registry-credentials')
         DOCKER_IMAGE_PREFIX = 'price-aggregator'
         
         // Environment variables
