@@ -1,9 +1,11 @@
 # Docker Compose Configuration for Price Aggregator Microservices
 # Production-ready setup with internal networking and security best practices
 
-version: '3.8'
+
+name: price-aggregator-microservices
 
 services:
+
   # MongoDB Database - Persistent storage for user data and cache
   mongodb:
     image: mongo:7.0
@@ -24,7 +26,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    # MongoDB not exposed externally for security
 
   # Redis Cache - Session management and caching layer
   redis:
@@ -41,10 +42,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    # Redis not exposed externally for security
 
   # Python Collector Service - Product scraping and data collection
-  # This service is INTERNAL ONLY - no external port exposure
   python-collector:
     build:
       context: ../python-collector
@@ -65,7 +64,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-    # NO PORTS - Internal communication only via container name
 
   # Node.js Gateway - API Gateway with JWT authentication
   node-gateway:
@@ -115,6 +113,20 @@ services:
     networks:
       - internal-network
 
+  # Jenkins - CI/CD Pipeline
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: price-aggregator-jenkins
+    restart: unless-stopped
+    ports:
+      - "${JENKINS_PORT:-8080}:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - internal-network
+
 # Named volumes for data persistence
 volumes:
   mongodb_data:
@@ -122,6 +134,8 @@ volumes:
   mongodb_config:
     driver: local
   redis_data:
+    driver: local
+  jenkins_data:
     driver: local
 
 # Internal bridge network for secure service communication
