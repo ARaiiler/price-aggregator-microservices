@@ -45,7 +45,7 @@ This document describes the architecture, design decisions, and data flow for th
          │ HTTP
 ┌────────▼─────────────────────────────────────────────────────────┐
 │                      Presentation Layer                          │
-│  ┌───────────────────────────────────────────────────┐          │
+│  ┌────────────────────────────────────────────────────┐          │
 │  │          Frontend (React + Nginx)                  │          │
 │  │          Port: 3000 (Exposed)                      │          │
 │  │  - User Interface                                  │          │
@@ -57,7 +57,7 @@ This document describes the architecture, design decisions, and data flow for th
                           │ HTTP REST
 ┌─────────────────────────▼────────────────────────────────────────┐
 │                      Application Layer                           │
-│  ┌───────────────────────────────────────────────────┐          │
+│  ┌────────────────────────────────────────────────────┐          │
 │  │       Node.js API Gateway (Express)                │          │
 │  │       Port: 5000 (Exposed)                         │          │
 │  │  - Authentication (JWT)                            │          │
@@ -65,7 +65,7 @@ This document describes the architecture, design decisions, and data flow for th
 │  │  - Request Routing                                 │          │
 │  │  - Input Validation                                │          │
 │  │  - Service Orchestration                           │          │
-│  └──────┬────────────────────────────┬─────────────────┘          │
+│  └──────┬────────────────────────────┬────────────────┘          │
 │         │                            │                           │
 └─────────┼────────────────────────────┼───────────────────────────┘
           │                            │
@@ -73,24 +73,24 @@ This document describes the architecture, design decisions, and data flow for th
           │                            │
 ┌─────────▼────────────────────────────▼───────────────────────────┐
 │                      Service Layer                               │
-│  ┌────────────────────────────┐    ┌───────────────────────┐   │
-│  │  Python Collector (FastAPI)│    │    MongoDB            │   │
-│  │  Port: 8000 (Internal)     │    │    Port: 27017        │   │
-│  │  - Web Scraping            │    │    (Internal)         │   │
-│  │  - Data Collection         │    │    - User Data        │   │
-│  │  - Price Aggregation       │    │    - Product Cache    │   │
-│  │  - Data Normalization      │    │    - Auth Storage     │   │
-│  └────────────┬───────────────┘    └───────────────────────┘   │
+│  ┌────────────────────────────┐    ┌───────────────────────┐     │
+│  │  Python Collector (FastAPI)│    │    MongoDB            │     │
+│  │  Port: 8000 (Internal)     │    │    Port: 27017        │     │
+│  │  - Web Scraping            │    │    (Internal)         │     │
+│  │  - Data Collection         │    │    - User Data        │     │
+│  │  - Price Aggregation       │    │    - Product Cache    │     │
+│  │  - Data Normalization      │    │    - Auth Storage     │     │
+│  └────────────┬───────────────┘    └───────────────────────┘     │
 │               │                                                  │
 │               │ Redis Protocol                                   │
 │               │                                                  │
-│  ┌────────────▼───────────────┐                                 │
-│  │       Redis Cache          │                                 │
-│  │       Port: 6379 (Internal)│                                 │
-│  │  - Session Storage         │                                 │
-│  │  - Query Cache             │                                 │
-│  │  - Rate Limit Store        │                                 │
-│  └────────────────────────────┘                                 │
+│  ┌────────────▼───────────────┐                                  │
+│  │       Redis Cache          │                                  │
+│  │       Port: 6379 (Internal)│                                  │
+│  │  - Session Storage         │                                  │
+│  │  - Query Cache             │                                  │
+│  │  - Rate Limit Store        │                                  │
+│  └────────────────────────────┘                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -104,13 +104,13 @@ This document describes the architecture, design decisions, and data flow for th
 ┌────┐     ┌──────────┐     ┌──────────┐     ┌──────────────┐
 │User├────▶│ Frontend ├────▶│ Gateway  ├────▶│   Python     │
 └────┘     └──────────┘     └──────────┘     │  Collector   │
-                                              └──────┬───────┘
-                                                     │
-                                                     ▼
-                                              ┌──────────────┐
-                                              │    Redis     │
-                                              │    Cache     │
-                                              └──────────────┘
+                                             └──────┬───────┘
+                                                    │
+                                                    ▼
+                                             ┌──────────────┐
+                                             │    Redis     │
+                                             │    Cache     │
+                                             └──────────────┘
 
 1. User enters search query in Frontend
 2. Frontend sends HTTP GET to Gateway (/search?query=laptop)
@@ -127,7 +127,7 @@ This document describes the architecture, design decisions, and data flow for th
 
 ```
 ┌────┐     ┌──────────┐     ┌──────────┐           ┌──────────┐
-│User├────▶│ Frontend ├────▶│ Gateway  ├────▶    │ MongoDB  │
+│User├────▶│ Frontend ├────▶│ Gateway  ├────▶      │ MongoDB  │
 └────┘     └──────────┘     └──────────┘           └──────────┘
                                 │
                                 ▼
@@ -150,14 +150,14 @@ Login Flow:
 
 ```
 ┌──────────────┐     ┌─────────────┐         ┌────────────┐
-│   Gateway    ├────▶│   Python    ├────▶   │  External  │
+│   Gateway    ├────▶│   Python    ├────▶    │  External  │
 │              │     │  Collector  │         │  E-commerce│
 └──────────────┘     └──────┬──────┘         │   Sites    │
                             │                └────────────┘
                             ▼
                      ┌──────────────┐
                      │    Redis     │
-                     │   Cache      │
+                     │    Cache     │
                      └──────────────┘
 
 1. Gateway calls Python Collector endpoint
@@ -188,9 +188,9 @@ Login Flow:
 │                     │                                │
 │            ┌────────┼────────┐                       │
 │            │                 │                       │
-│       ┌────▼────┐      ┌────▼────┐                   │
-│       │ MongoDB │      │  Redis  │                   │
-│       └─────────┘      └─────────┘                   │
+│       ┌────▼────┐       ┌────▼────┐                  │
+│       │ MongoDB │       │  Redis  │                  │
+│       └─────────┘       └─────────┘                  │
 │                                                      │
 └──────────────────────────────────────────────────────┘
          │              │
@@ -201,15 +201,16 @@ Login Flow:
 
 ### Port Exposure Strategy
 
-| Service | Internal Port | Exposed Port | Access Level |
-|---------|--------------|--------------|--------------|
-| Frontend | 3000 | 3000 | Public |
-| Node Gateway | 5000 | 5000 | Public |
-| Python Collector | 8000 | - | **Internal Only** |
-| MongoDB | 27017 | - | **Internal Only** |
-| Redis | 6379 | - | **Internal Only** |
+| Service          | Internal Port | Exposed Port | Access Level      |
+| ---------------- | ------------- | ------------ | ----------------- |
+| Frontend         | 3000          | 3000         | Public            |
+| Node Gateway     | 5000          | 5000         | Public            |
+| Python Collector | 8000          | -            | **Internal Only** |
+| MongoDB          | 27017         | -            | **Internal Only** |
+| Redis            | 6379          | -            | **Internal Only** |
 
 **Security Rationale:**
+
 - Only frontend and gateway are customer-facing
 - Python collector is accessed exclusively by gateway via container name
 - Database and cache are never exposed externally
@@ -223,33 +224,33 @@ Login Flow:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│ Layer 1: Network Isolation                         │
-│ - Internal Docker network                          │
-│ - No external exposure for backend services        │
+│ Layer 1: Network Isolation                          │
+│ - Internal Docker network                           │
+│ - No external exposure for backend services         │
 └─────────────────────────────────────────────────────┘
                     ▼
 ┌─────────────────────────────────────────────────────┐
-│ Layer 2: Container Security                        │
-│ - Non-root users in all containers                 │
-│ - Minimal base images (Alpine, Slim)               │
-│ - Read-only file systems where possible            │
+│ Layer 2: Container Security                         │
+│ - Non-root users in all containers                  │
+│ - Minimal base images (Alpine, Slim)                │
+│ - Read-only file systems where possible             │
 └─────────────────────────────────────────────────────┘
                     ▼
 ┌─────────────────────────────────────────────────────┐
-│ Layer 3: Application Security                      │
-│ - JWT authentication                               │
-│ - BCrypt password hashing                          │
-│ - Rate limiting                                    │
-│ - Input validation                                 │
-│ - Helmet.js security headers                       │
+│ Layer 3: Application Security                       │
+│ - JWT authentication                                │
+│ - BCrypt password hashing                           │
+│ - Rate limiting                                     │
+│ - Input validation                                  │
+│ - Helmet.js security headers                        │
 └─────────────────────────────────────────────────────┘
                     ▼
 ┌─────────────────────────────────────────────────────┐
-│ Layer 4: Data Security                             │
-│ - Environment-based secrets                        │
-│ - Encrypted connections                            │
-│ - Database authentication                          │
-│ - Password-protected Redis                         │
+│ Layer 4: Data Security                              │
+│ - Environment-based secrets                         │
+│ - Encrypted connections                             │
+│ - Database authentication                           │
+│ - Password-protected Redis                          │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -278,7 +279,7 @@ All internal communication uses **container name DNS resolution**:
 
 ```javascript
 // Gateway → Python Collector
-const PYTHON_URL = process.env.PYTHON_SERVICE_URL; 
+const PYTHON_URL = process.env.PYTHON_SERVICE_URL;
 // "http://python-collector:8000"
 
 // Gateway → MongoDB
@@ -291,6 +292,7 @@ const REDIS_URL = process.env.REDIS_URL;
 ```
 
 **Benefits:**
+
 - No hardcoded IPs
 - DNS-based service discovery
 - Easy to scale and replace containers
@@ -312,9 +314,10 @@ Frontend ━━━━━━HTTP━━━━▶ Gateway ━━━━━━HTTP━
 
 **Protocol:** HTTP/HTTPS REST  
 **Format:** JSON  
-**Pattern:** Request-Response  
+**Pattern:** Request-Response
 
 **Example:**
+
 ```http
 GET /search?query=laptop HTTP/1.1
 Host: node-gateway:5000
@@ -324,6 +327,7 @@ Authorization: Bearer eyJhbG...
 ### Asynchronous Communication (Future)
 
 For scalability, consider adding:
+
 - **Message Queue:** RabbitMQ or Apache Kafka
 - **Event Bus:** For pub/sub patterns
 - **Background Jobs:** Bull/Celery for long-running tasks
@@ -339,25 +343,25 @@ For scalability, consider adding:
 │              MongoDB (Primary Database)            │
 ├────────────────────────────────────────────────────┤
 │ Collections:                                       │
-│  - users: User accounts and profiles              │
-│  - products: Cached product data (optional)       │
-│  - searches: Search history (analytics)           │
-│  - sessions: Active user sessions                 │
+│  - users: User accounts and profiles               │
+│  - products: Cached product data (optional)        │
+│  - searches: Search history (analytics)            │
+│  - sessions: Active user sessions                  │
 └────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────┐
 │                Redis (Cache Layer)                 │
 ├────────────────────────────────────────────────────┤
 │ Key Patterns:                                      │
-│  - search:<query_hash>: Cached search results     │
-│  - session:<user_id>: User session data           │
-│  - rate_limit:<ip>: API rate limiting             │
-│  - product:<id>: Individual product cache         │
+│  - search:<query_hash>: Cached search results      │
+│  - session:<user_id>: User session data            │
+│  - rate_limit:<ip>: API rate limiting              │
+│  - product:<id>: Individual product cache          │
 │                                                    │
 │ TTL Strategy:                                      │
-│  - Search results: 1 hour                         │
-│  - Sessions: 24 hours                             │
-│  - Rate limits: 15 minutes                        │
+│  - Search results: 1 hour                          │
+│  - Sessions: 24 hours                              │
+│  - Rate limits: 15 minutes                         │
 └────────────────────────────────────────────────────┘
 ```
 
@@ -377,6 +381,7 @@ redis_data/
 ```
 
 **Backup Strategy:**
+
 - Schedule regular MongoDB dumps
 - Redis snapshots for cache recovery
 - Volume backups to external storage
@@ -388,26 +393,24 @@ redis_data/
 ### Container Orchestration
 
 ```yaml
-Docker Compose Dependency Graph:
-
-                  frontend
-                      │
-                      │ depends_on
-                      ▼
-                 node-gateway
-                      │
-            ┌─────────┼─────────┐
-            │         │         │
-       depends_on  depends_on  depends_on
-            │         │         │
-            ▼         ▼         ▼
-      python-    mongodb    redis
-      collector
-            │
-       depends_on
-            │
-            ▼
-          redis
+Docker Compose Dependency Graph: frontend
+  │
+  │ depends_on
+  ▼
+  node-gateway
+  │
+  ┌─────────┼─────────┐
+  │         │         │
+  depends_on  depends_on  depends_on
+  │         │         │
+  ▼         ▼         ▼
+  python-    mongodb    redis
+  collector
+  │
+  depends_on
+  │
+  ▼
+  redis
 ```
 
 ### Health Check Strategy
@@ -417,13 +420,14 @@ All services implement health checks:
 ```yaml
 healthcheck:
   test: [health check command]
-  interval: 30s      # Check every 30 seconds
-  timeout: 3s        # Fail if no response in 3s
-  retries: 3         # Try 3 times before marking unhealthy
-  start_period: 10s  # Grace period after container start
+  interval: 30s # Check every 30 seconds
+  timeout: 3s # Fail if no response in 3s
+  retries: 3 # Try 3 times before marking unhealthy
+  start_period: 10s # Grace period after container start
 ```
 
 **Benefits:**
+
 - Automatic unhealthy container detection
 - Prevents routing to failed services
 - Enables automated recovery
@@ -447,7 +451,7 @@ docker compose up -d --scale node-gateway=2
 ### Load Balancing (Future)
 
 ```
-                ┌─────────────┐
+                ┌──────────────┐
                 │ Load Balancer│
                 │  (Nginx)     │
                 └──────┬───────┘
@@ -479,13 +483,13 @@ MongoDB Replica Set (Future):
 
 ### Why Microservices?
 
-| Benefit | Implementation |
-|---------|----------------|
-| **Independent Deployment** | Each service has its own container |
-| **Technology Diversity** | Node.js for API, Python for scraping |
-| **Fault Isolation** | One service failure doesn't cascade |
-| **Team Autonomy** | Teams can own individual services |
-| **Scalability** | Scale services independently |
+| Benefit                    | Implementation                       |
+| -------------------------- | ------------------------------------ |
+| **Independent Deployment** | Each service has its own container   |
+| **Technology Diversity**   | Node.js for API, Python for scraping |
+| **Fault Isolation**        | One service failure doesn't cascade  |
+| **Team Autonomy**          | Teams can own individual services    |
+| **Scalability**            | Scale services independently         |
 
 ### Why Docker?
 
@@ -497,19 +501,20 @@ MongoDB Replica Set (Future):
 
 ### Why This Tech Stack?
 
-| Component | Reason |
-|-----------|--------|
-| **React** | Modern UI, component reusability, large ecosystem |
-| **Express** | Mature, middleware-friendly, Node.js ecosystem |
+| Component   | Reason                                               |
+| ----------- | ---------------------------------------------------- |
+| **React**   | Modern UI, component reusability, large ecosystem    |
+| **Express** | Mature, middleware-friendly, Node.js ecosystem       |
 | **FastAPI** | High performance, async support, auto-generated docs |
-| **MongoDB** | Flexible schema, JSON-native, good for product data |
-| **Redis** | Fast in-memory cache, pub/sub support, simple APIs |
+| **MongoDB** | Flexible schema, JSON-native, good for product data  |
+| **Redis**   | Fast in-memory cache, pub/sub support, simple APIs   |
 
 ---
 
 ## 🔮 Future Enhancements
 
 ### Phase 2: Production Hardening
+
 - [ ] Implement Kubernetes manifests
 - [ ] Add service mesh (Istio/Linkerd)
 - [ ] Implement distributed tracing (Jaeger)
@@ -517,6 +522,7 @@ MongoDB Replica Set (Future):
 - [ ] Set up log aggregation (ELK stack)
 
 ### Phase 3: Feature Expansion
+
 - [ ] Real-time price alerts
 - [ ] User preferences and wishlists
 - [ ] Price history tracking
@@ -524,6 +530,7 @@ MongoDB Replica Set (Future):
 - [ ] Mobile app with shared backend
 
 ### Phase 4: Scale Optimization
+
 - [ ] Implement caching strategies (CDN)
 - [ ] Database sharding
 - [ ] Read replicas for MongoDB

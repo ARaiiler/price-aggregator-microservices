@@ -60,11 +60,11 @@ This system implements a microservices architecture with five services communica
                     │                                   │               │
                     │            ┌──────────────────────┴──────┐        │
                     │            │                             │        │
-                    │       ┌────▼─────┐                 ┌─────▼────┐  │
-                    │       │ MongoDB  │                 │  Redis   │  │
-                    │       │ :27017   │                 │  :6379   │  │
-                    │       │  (INT)   │                 │  (INT)   │  │
-                    │       └──────────┘                 └──────────┘  │
+                    │       ┌────▼─────┐                 ┌─────▼────┐   │
+                    │       │ MongoDB  │                 │  Redis   │   │
+                    │       │ :27017   │                 │  :6379   │   │
+                    │       │  (INT)   │                 │  (INT)   │   │
+                    │       └──────────┘                 └──────────┘   │
                     │                                                   │
                     └───────────────────────────────────────────────────┘
 
@@ -87,40 +87,40 @@ For comprehensive architecture documentation, see [ARCHITECTURE.md](infrastructu
 
 ## Technology Stack
 
-| Service | Technology | Version |
-|---------|-----------|---------|
-| **Frontend** | React | 18.x |
-| **Node Gateway** | Express.js | 4.x |
-| **Python Collector** | FastAPI | 0.108+ |
-| **Database** | MongoDB | 7.0 |
-| **Cache** | Redis | 7.x |
-| **Containerization** | Docker | 24.x |
-| **Orchestration** | Docker Compose | 3.8 |
-| **CI/CD** | Jenkins | Latest |
-| **Web Server** | Nginx (for React) | Alpine |
-| **Runtime (Node)** | Node.js | 18 Alpine |
-| **Runtime (Python)** | Python | 3.11 Slim |
+| Service              | Technology        | Version   |
+| -------------------- | ----------------- | --------- |
+| **Frontend**         | React             | 18.x      |
+| **Node Gateway**     | Express.js        | 4.x       |
+| **Python Collector** | FastAPI           | 0.108+    |
+| **Database**         | MongoDB           | 7.0       |
+| **Cache**            | Redis             | 7.x       |
+| **Containerization** | Docker            | 24.x      |
+| **Orchestration**    | Docker Compose    | 3.8       |
+| **CI/CD**            | Jenkins           | Latest    |
+| **Web Server**       | Nginx (for React) | Alpine    |
+| **Runtime (Node)**   | Node.js           | 18 Alpine |
+| **Runtime (Python)** | Python            | 3.11 Slim |
 
 ## Technology Stack
 
 ### Application Services
 
-| Component | Technology | Version | Purpose |
-|-----------|-----------|---------|---------|
-| Frontend | React | 18.x | User interface and client-side logic |
-| API Gateway | Express.js | 4.x | Authentication, routing, rate limiting |
-| Collector Service | FastAPI | 0.108+ | Product data aggregation and web scraping |
-| Database | MongoDB | 7.0 | Persistent data storage |
-| Cache | Redis | 7.x | Session management and query caching |
+| Component         | Technology | Version | Purpose                                   |
+| ----------------- | ---------- | ------- | ----------------------------------------- |
+| Frontend          | React      | 18.x    | User interface and client-side logic      |
+| API Gateway       | Express.js | 4.x     | Authentication, routing, rate limiting    |
+| Collector Service | FastAPI    | 0.108+  | Product data aggregation and web scraping |
+| Database          | MongoDB    | 7.0     | Persistent data storage                   |
+| Cache             | Redis      | 7.x     | Session management and query caching      |
 
 ### Infrastructure
 
-| Component | Technology | Version | Purpose |
-|-----------|-----------|---------|---------|
-| Containerization | Docker | 24.x | Service isolation and deployment |
-| Orchestration | Docker Compose | 2.x | Multi-container management |
-| CI/CD | Jenkins | Latest | Automated build and deployment pipeline |
-| Web Server | Nginx | Alpine | Static asset serving for React |
+| Component        | Technology     | Version | Purpose                                 |
+| ---------------- | -------------- | ------- | --------------------------------------- |
+| Containerization | Docker         | 24.x    | Service isolation and deployment        |
+| Orchestration    | Docker Compose | 2.x     | Multi-container management              |
+| CI/CD            | Jenkins        | Latest  | Automated build and deployment pipeline |
+| Web Server       | Nginx          | Alpine  | Static asset serving for React          |
 
 ### Runtime Environments
 
@@ -134,7 +134,7 @@ For comprehensive architecture documentation, see [ARCHITECTURE.md](infrastructu
 ### Required Software
 
 - **Docker**: Version 20.10 or higher
-- **Docker Compose**: Version 2.0 or higher  
+- **Docker Compose**: Version 2.0 or higher
 - **Git**: Latest stable version
 
 ### Optional
@@ -208,6 +208,7 @@ docker compose up -d --build
 ```
 
 This command:
+
 - Builds Docker images for all services
 - Creates internal network (172.28.0.0/16)
 - Starts containers in detached mode
@@ -227,6 +228,7 @@ curl http://localhost:5000/health
 ```
 
 Expected output:
+
 ```json
 {
   "uptime": 123.45,
@@ -239,9 +241,9 @@ Expected output:
 
 ### 5. Access Services
 
-- **Frontend**: http://localhost:3000
-- **API Gateway**: http://localhost:5000
-- **API Documentation**: http://localhost:5000 (interactive)
+- **Frontend**: <http://localhost:3000>
+- **API Gateway**: <http://localhost:5000>
+- **API Documentation**: <http://localhost:5000> (interactive)
 
 **Note**: Python Collector (port 8000), MongoDB (port 27017), and Redis (port 6379) are not exposed to the host network for security reasons.
 
@@ -282,6 +284,7 @@ git checkout -b feature/your-feature-name
 ```
 
 Branch naming conventions:
+
 - `feature/` - New features
 - `bugfix/` - Bug fixes
 - `hotfix/` - Production hotfixes
@@ -293,11 +296,13 @@ Branch naming conventions:
 Make your changes following these guidelines:
 
 **Before writing code**:
+
 - Review [ARCHITECTURE.md](infrastructure/ARCHITECTURE.md)
 - Understand service boundaries
 - Check existing patterns
 
 **While coding**:
+
 - Follow existing code style
 - Add comments for complex logic
 - Update documentation if needed
@@ -326,6 +331,7 @@ docker compose logs -f python-collector
 ```
 
 **For Node.js changes**:
+
 ```bash
 cd node-gateway
 npm test  # Run unit tests
@@ -333,6 +339,7 @@ npm run lint  # Check code style
 ```
 
 **For Python changes**:
+
 ```bash
 cd python-collector
 pip install -r requirements.txt
@@ -355,6 +362,7 @@ git commit -m "feat: add product filtering endpoint
 ```
 
 Commit message format:
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `docs:` - Documentation
@@ -370,6 +378,7 @@ git push origin feature/your-feature-name
 ```
 
 On GitHub:
+
 1. Navigate to repository
 2. Click "New Pull Request"
 3. Select your feature branch
@@ -384,6 +393,7 @@ On GitHub:
 #### 6. CI/CD Pipeline Execution
 
 Once PR is opened, Jenkins automatically:
+
 1. Checks out your branch
 2. Builds all Docker images
 3. Runs security scans
@@ -391,12 +401,14 @@ Once PR is opened, Jenkins automatically:
 5. Reports results in PR
 
 **If pipeline fails**:
+
 - Review Jenkins logs
 - Fix issues locally
 - Commit and push fixes
 - Pipeline re-runs automatically
 
 **If pipeline passes**:
+
 - Request code review
 - Address review comments
 - Wait for approval
@@ -404,6 +416,7 @@ Once PR is opened, Jenkins automatically:
 #### 7. Merge to Main
 
 After approval and successful CI:
+
 1. Squash commits (if multiple small commits)
 2. Merge Pull Request
 3. Delete feature branch
@@ -466,32 +479,32 @@ The project uses Jenkins for continuous integration and continuous deployment. T
 │                  Jenkins Pipeline Flow                      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  1. Checkout          │  Clone repository and get commit   │
+│  1. Checkout          │  Clone repository and get commit    │
 │                       │  information for tagging            │
 │                       │                                     │
-│  2. Environment Check │  Verify Docker and dependencies    │
+│  2. Environment Check │  Verify Docker and dependencies     │
 │                       │  are available                      │
 │                       │                                     │
-│  3. Build Services    │  Parallel build of all Docker      │
-│     (Parallel)        │  images:                           │
+│  3. Build Services    │  Parallel build of all Docker       │
+│     (Parallel)        │  images:                            │
 │                       │  ├─ Frontend (React + Nginx)        │
 │                       │  ├─ Node Gateway                    │
 │                       │  └─ Python Collector                │
 │                       │                                     │
-│  4. Compose Build     │  Build using docker-compose.yml    │
+│  4. Compose Build     │  Build using docker-compose.yml     │
 │                       │  to verify service integration      │
 │                       │                                     │
-│  5. Security Scan     │  (Placeholder) Vulnerability scan  │
-│                       │  Integration point for Trivy/Snyk  │
+│  5. Security Scan     │  (Placeholder) Vulnerability scan   │
+│                       │  Integration point for Trivy/Snyk   │
 │                       │                                     │
-│  6. Test              │  (Placeholder) Run test suites     │
-│                       │  Integration point for pytest/jest │
+│  6. Test              │  (Placeholder) Run test suites      │
+│                       │  Integration point for pytest/jest  │
 │                       │                                     │
-│  7. Push Images       │  Push to Docker registry           │
-│     (main only)       │  Only on main branch               │
+│  7. Push Images       │  Push to Docker registry            │
+│     (main only)       │  Only on main branch                │
 │                       │                                     │
-│  8. Deploy            │  Deploy to staging/production      │
-│     (main only)       │  Only on main branch               │
+│  8. Deploy            │  Deploy to staging/production       │
+│     (main only)       │  Only on main branch                │
 │                       │                                     │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -505,7 +518,7 @@ When a Pull Request is created or updated:
 1. **Webhook Trigger**: GitHub sends webhook to Jenkins
 2. **Pipeline Execution**: Jenkins runs full pipeline up to (but not including) push/deploy stages
 3. **Status Report**: Build status reported back to GitHub PR
-4. **PR Checks**: 
+4. **PR Checks**:
    - Green check: Pipeline passed, merge allowed
    - Red X: Pipeline failed, must fix before merge
 
@@ -582,9 +595,9 @@ External Network (Internet)
 │  All Services (DNS Resolution):           │
 │  ├─ frontend:3000                         │
 │  ├─ node-gateway:5000                     │
-│  ├─ python-collector:8000  (NOT EXPOSED) │
-│  ├─ mongodb:27017          (NOT EXPOSED) │
-│  └─ redis:6379             (NOT EXPOSED) │
+│  ├─ python-collector:8000  (NOT EXPOSED)  │
+│  ├─ mongodb:27017          (NOT EXPOSED)  │
+│  └─ redis:6379             (NOT EXPOSED)  │
 │                                           │
 └───────────────────────────────────────────┘
 ```
@@ -594,6 +607,7 @@ External Network (Internet)
 Services communicate using **container names as hostnames**:
 
 **Example from Node Gateway**:
+
 ```javascript
 // Connect to Python Collector
 const PYTHON_URL = process.env.PYTHON_SERVICE_URL;
@@ -609,6 +623,7 @@ const REDIS_URL = process.env.REDIS_URL;
 ```
 
 **Why DNS instead of IP addresses**:
+
 - Container IPs can change on restart
 - DNS resolution handles service discovery
 - Easy to scale and replace containers
@@ -617,12 +632,14 @@ const REDIS_URL = process.env.REDIS_URL;
 ### Why MongoDB and Redis Are Not Exposed
 
 **Security Benefits**:
+
 1. **Reduced Attack Surface**: Database ports not accessible from internet
 2. **Defense in Depth**: Even if gateway is compromised, databases remain isolated
 3. **Compliance**: Aligns with security best practices (CIS benchmarks)
 4. **Principle of Least Privilege**: Only services that need database access can reach it
 
 **Access Pattern**:
+
 - Application logic in Node Gateway queries MongoDB
 - Python Collector caches data in Redis
 - External clients cannot directly connect to databases
@@ -635,19 +652,21 @@ All custom services implement Docker health checks:
 ```yaml
 healthcheck:
   test: [health check command]
-  interval: 30s      # Run check every 30 seconds
-  timeout: 5s        # Fail if no response in 5 seconds
-  retries: 3         # Mark unhealthy after 3 failures
-  start_period: 10s  # Grace period after container start
+  interval: 30s # Run check every 30 seconds
+  timeout: 5s # Fail if no response in 5 seconds
+  retries: 3 # Mark unhealthy after 3 failures
+  start_period: 10s # Grace period after container start
 ```
 
 **Purpose**:
+
 - **Dependency Management**: Containers wait for dependencies to be healthy
 - **Auto-Recovery**: Orchestrator can restart unhealthy containers
 - **Load Balancing**: Remove unhealthy instances from load balancer pool
 - **Monitoring**: Health status visible in `docker compose ps`
 
 **Dependency Chain**:
+
 ```
 Frontend  →  depends_on  →  Node Gateway  →  depends_on  →  Python Collector
                               ↓                               ↓
@@ -691,23 +710,23 @@ docker run --rm -v infrastructure_mongodb_data:/data -v $(pwd):/backup \
 
 #### Required Variables
 
-| Variable | Description | Example | Security Level |
-|----------|-------------|---------|----------------|
-| `MONGO_ROOT_USERNAME` | MongoDB admin username | `admin` | Low |
-| `MONGO_ROOT_PASSWORD` | MongoDB admin password | `h8Kf2@mPq9` | **CRITICAL** |
-| `MONGO_DATABASE` | Database name | `priceaggregator` | Low |
-| `REDIS_PASSWORD` | Redis authentication password | `r9Xm#pL2kQ` | **HIGH** |
-| `JWT_SECRET` | Secret key for JWT signing | `base64encodedkey...` | **CRITICAL** |
+| Variable              | Description                   | Example               | Security Level |
+| --------------------- | ----------------------------- | --------------------- | -------------- |
+| `MONGO_ROOT_USERNAME` | MongoDB admin username        | `admin`               | Low            |
+| `MONGO_ROOT_PASSWORD` | MongoDB admin password        | `h8Kf2@mPq9`          | **CRITICAL**   |
+| `MONGO_DATABASE`      | Database name                 | `priceaggregator`     | Low            |
+| `REDIS_PASSWORD`      | Redis authentication password | `r9Xm#pL2kQ`          | **HIGH**       |
+| `JWT_SECRET`          | Secret key for JWT signing    | `base64encodedkey...` | **CRITICAL**   |
 
 #### Optional Configuration
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `ENVIRONMENT` | Application environment | `production` |
-| `NODE_ENV` | Node.js environment | `production` |
-| `FRONTEND_PORT` | Frontend exposed port | `3000` |
-| `NODE_GATEWAY_PORT` | Gateway exposed port | `5000` |
-| `PYTHON_SERVICE_URL` | Python collector URL | `http://python-collector:8000` |
+| Variable             | Description             | Default                        |
+| -------------------- | ----------------------- | ------------------------------ |
+| `ENVIRONMENT`        | Application environment | `production`                   |
+| `NODE_ENV`           | Node.js environment     | `production`                   |
+| `FRONTEND_PORT`      | Frontend exposed port   | `3000`                         |
+| `NODE_GATEWAY_PORT`  | Gateway exposed port    | `5000`                         |
+| `PYTHON_SERVICE_URL` | Python collector URL    | `http://python-collector:8000` |
 
 ### Security Best Practices
 
@@ -727,12 +746,14 @@ uuidgen
 #### Secret Storage
 
 **NEVER**:
+
 - Commit `.env` file to version control
 - Share secrets via email or chat
 - Hardcode secrets in application code
 - Use default or example passwords in production
 
 **ALWAYS**:
+
 - Add `.env` to `.gitignore` (already done)
 - Use unique secrets per environment
 - Rotate secrets regularly
@@ -792,6 +813,7 @@ FRONTEND_URL=http://localhost:3000
 ### Authentication Endpoints
 
 #### Register User
+
 ```http
 POST /auth/register
 Content-Type: application/json
@@ -803,6 +825,7 @@ Content-Type: application/json
 ```
 
 **Response** (201 Created):
+
 ```json
 {
   "message": "User registered successfully",
@@ -811,6 +834,7 @@ Content-Type: application/json
 ```
 
 #### Login
+
 ```http
 POST /auth/login
 Content-Type: application/json
@@ -822,6 +846,7 @@ Content-Type: application/json
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "message": "Login successful",
@@ -830,12 +855,14 @@ Content-Type: application/json
 ```
 
 #### Verify Token
+
 ```http
 GET /auth/verify
 Authorization: Bearer {token}
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "valid": true,
@@ -848,12 +875,14 @@ Authorization: Bearer {token}
 ### Product Search Endpoints
 
 #### Search Products
+
 ```http
 GET /search?query=laptop
 Authorization: Bearer {token}
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -881,6 +910,7 @@ GET /health
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "uptime": 12345.67,
@@ -946,6 +976,7 @@ On GitHub, configure main branch protection:
 **Team Responsibility**: Maintain passing CI at all times.
 
 If CI fails on main:
+
 1. **Immediate action**: Create hotfix branch
 2. **Fix forward**: Push fix to restore green status
 3. **Post-mortem**: Understand why CI passed on PR but failed on main
@@ -1045,8 +1076,8 @@ For major changes, please open an issue first to discuss proposed changes.
 
 For questions and issues:
 
-- **Issues**: https://github.com/yourusername/price-aggregator-microservices/issues
-- **Discussions**: https://github.com/yourusername/price-aggregator-microservices/discussions
+- **Issues**: <https://github.com/yourusername/price-aggregator-microservices/issues>
+- **Discussions**: <https://github.com/yourusername/price-aggregator-microservices/discussions>
 - **Documentation**: [ARCHITECTURE.md](infrastructure/ARCHITECTURE.md)
 
 ---
