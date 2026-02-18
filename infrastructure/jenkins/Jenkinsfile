@@ -5,22 +5,13 @@ pipeline {
     agent any
     
     environment {
-        // Docker registry credentials (configure in Jenkins)
         DOCKER_IMAGE_PREFIX = 'price-aggregator'
-        
-        // Environment variables
-        COMPOSE_FILE = 'infrastructure/docker-compose.yml'
         COMPOSE_PROJECT_NAME = 'price-aggregator'
     }
     
     options {
-        // Keep last 10 builds
         buildDiscarder(logRotator(numToKeepStr: '10'))
-        
-        // Timeout after 30 minutes
         timeout(time: 30, unit: 'MINUTES')
-        
-        // Disable concurrent builds
         disableConcurrentBuilds()
     }
     
@@ -29,9 +20,7 @@ pipeline {
             steps {
                 echo '📦 Checking out source code...'
                 checkout scm
-                
                 script {
-                    // Get commit information
                     env.GIT_COMMIT_SHORT = sh(
                         script: "git rev-parse --short HEAD",
                         returnStdout: true
@@ -47,10 +36,8 @@ pipeline {
                 sh '''
                     echo "Docker version:"
                     docker --version
-                    
                     echo "Docker Compose version:"
                     docker compose version
-                    
                     echo "Build Tag: ${BUILD_TAG}"
                 '''
             }
@@ -100,9 +87,7 @@ pipeline {
             steps {
                 echo '🐳 Building services with Docker Compose...'
                 dir('infrastructure') {
-                    sh '''
-                        docker compose build --no-cache
-                    '''
+                    sh 'docker compose -f docker-compose.yml build --no-cache'
                 }
             }
         }
@@ -110,22 +95,14 @@ pipeline {
         stage('Security Scan') {
             steps {
                 echo '🔒 Running security scans...'
-                script {
-                    // Placeholder for security scanning
-                    // In production: integrate tools like Trivy, Snyk, etc.
-                    echo 'Security scanning (add Trivy or similar)'
-                }
+                echo 'Security scanning (add Trivy or similar)'
             }
         }
         
         stage('Test') {
             steps {
                 echo '🧪 Running tests...'
-                script {
-                    // Placeholder for test execution
-                    // In production: run unit tests, integration tests
-                    echo 'Testing stage (add test commands)'
-                }
+                echo 'Testing stage (add test commands)'
             }
         }
         
@@ -135,18 +112,7 @@ pipeline {
             }
             steps {
                 echo '📤 Pushing Docker images to registry...'
-                script {
-                    // Push to Docker registry (requires configuration)
-                    // Uncomment when registry is configured
-                    /*
-                    sh """
-                        docker push ${DOCKER_IMAGE_PREFIX}-frontend:${BUILD_TAG}
-                        docker push ${DOCKER_IMAGE_PREFIX}-gateway:${BUILD_TAG}
-                        docker push ${DOCKER_IMAGE_PREFIX}-collector:${BUILD_TAG}
-                    """
-                    */
-                    echo 'Image push (configure Docker registry credentials)'
-                }
+                echo 'Image push (configure Docker registry credentials)'
             }
         }
         
@@ -156,11 +122,7 @@ pipeline {
             }
             steps {
                 echo '🚀 Deploying services...'
-                script {
-                    // Deployment logic
-                    // In production: deploy to Kubernetes, Docker Swarm, etc.
-                    echo 'Deployment stage (add deployment commands)'
-                }
+                echo 'Deployment stage (add deployment commands)'
             }
         }
     }
@@ -168,20 +130,13 @@ pipeline {
     post {
         success {
             echo '✅ Pipeline completed successfully!'
-            // Add notifications (Slack, email, etc.)
         }
-        
         failure {
             echo '❌ Pipeline failed!'
-            // Add failure notifications
         }
-        
         always {
             echo '🧹 Cleaning up...'
-            sh '''
-                # Clean up dangling images
-                docker image prune -f
-            '''
+            sh 'docker image prune -f'
         }
     }
 }
