@@ -157,7 +157,7 @@ git --version
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/price-aggregator-microservices.git
+git clone https://github.com/ARaiiler/price-aggregator-microservices.git
 cd price-aggregator-microservices
 ```
 
