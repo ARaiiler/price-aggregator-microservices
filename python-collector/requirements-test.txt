@@ -1,0 +1,12 @@
+# Test-only dependencies for the Python Data Collector service.
+# Install with:  pip install -r requirements-test.txt
+#
+# NOTE: the production dependencies (requirements.txt) must also be
+# installed in the same environment.  A convenient one-liner:
+#   pip install -r requirements.txt -r requirements-test.txt
+
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+httpx>=0.26.0          # also a prod dep — listed here for explicitness
+coverage>=7.4.0
+pytest-cov>=4.1.0

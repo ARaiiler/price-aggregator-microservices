@@ -1,6 +1,7 @@
 """
-Services package initialization
+Services package.
 """
-from .scraper import ProductScraper
+from .cache_service import CacheService
+from .collector_service import CollectorService
 
-__all__ = ["ProductScraper"]
+__all__ = ["CacheService", "CollectorService"]

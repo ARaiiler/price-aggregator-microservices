@@ -50,20 +50,36 @@ services:
       dockerfile: Dockerfile
     container_name: price-aggregator-python-collector
     restart: unless-stopped
+    # No ports: block is intentionally absent.
+    # This service is reachable only via Docker DNS (python-collector:8000)
+    # within the internal-network bridge.  Exposing a host port would make
+    # the internal /internal/* routes accessible from outside the cluster.
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-production}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379/0
+      - SERVICE_PORT=8000
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      # Redis connection — individual parts (preferred over REDIS_URL)
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-changeme}
+      # Cache TTLs
+      - CACHE_TTL_SECONDS=${CACHE_TTL_SECONDS:-3600}
+      - LATEST_PRICE_TTL_SECONDS=${LATEST_PRICE_TTL_SECONDS:-600}
     depends_on:
       redis:
         condition: service_healthy
     networks:
       - internal-network
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=4)"
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
 
   # Node.js Gateway - API Gateway with JWT authentication
   node-gateway:

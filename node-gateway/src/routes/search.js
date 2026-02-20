@@ -24,15 +24,18 @@ router.get(
 
     try {
       // Call Python collector service
-      const response = await axios.get(`${PYTHON_SERVICE_URL}/fetch-product`, {
-        params: { product_name: searchQuery },
-        timeout: 10000
-      });
+      const response = await axios.post(
+        `${PYTHON_SERVICE_URL}/internal/search`,
+        { product_name: searchQuery },
+        { timeout: 15000 }
+      );
 
       res.json({
         success: true,
         query: searchQuery,
         results: response.data.results || [],
+        cached: response.data.cached ?? false,
+        sources_queried: response.data.sources_queried ?? 0,
         timestamp: new Date().toISOString()
       });
     } catch (error) {
