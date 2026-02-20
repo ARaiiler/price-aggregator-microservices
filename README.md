@@ -20,12 +20,12 @@ A production-ready microservices platform for aggregating and comparing product 
   - [Base URL](#base-url)
   - [Authentication Header](#authentication-header)
   - [Endpoint Summary](#endpoint-summary)
-  - [Service Info — GET /](#service-info)
-  - [Health Check — GET /health](#health-check)
+  - [Service Info — GET /](#get-)
+  - [Health Check — GET /health](#get-health)
   - [Register — POST /auth/register](#post-authregister)
   - [Login — POST /auth/login](#post-authlogin)
   - [Search — GET /search](#get-search)
-  - [Global Error Format](#global-error-format)
+  - [Global Error Envelope](#global-error-envelope)
 - [Production Notes](#production-notes)
 - [Future Enhancements](#future-enhancements)
 - [License](#license)
@@ -93,22 +93,6 @@ Legend: (INT) = Internal Only - Not Exposed to Host Network
 For comprehensive architecture documentation, see [ARCHITECTURE.md](infrastructure/ARCHITECTURE.md).
 
 ---
-
-## Technology Stack
-
-| Service              | Technology        | Version   |
-| -------------------- | ----------------- | --------- |
-| **Frontend**         | React             | 18.x      |
-| **Node Gateway**     | Express.js        | 4.x       |
-| **Python Collector** | FastAPI           | 0.108+    |
-| **Database**         | MongoDB           | 7.0       |
-| **Cache**            | Redis             | 7.x       |
-| **Containerization** | Docker            | 24.x      |
-| **Orchestration**    | Docker Compose    | 3.8       |
-| **CI/CD**            | Jenkins           | Latest    |
-| **Web Server**       | Nginx (for React) | Alpine    |
-| **Runtime (Node)**   | Node.js           | 18 Alpine |
-| **Runtime (Python)** | Python            | 3.11 Slim |
 
 ## Technology Stack
 
@@ -825,16 +809,16 @@ FRONTEND_URL=http://localhost:3000
 
 ### Base URL
 
-| Environment | URL |
-|-------------|-----|
-| Local development | `http://localhost:5000` |
+| Environment           | URL                        |
+| --------------------- | -------------------------- |
+| Local development     | `http://localhost:5000`    |
 | Inside Docker network | `http://node-gateway:5000` |
 
 The frontend resolves the base URL from the `REACT_APP_API_URL` environment variable (defaults to `http://localhost:5000`).
 
 ```javascript
 // frontend/src/App.js
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 ```
 
 ---
@@ -847,22 +831,22 @@ Protected endpoints require the JWT obtained from `POST /auth/login` sent as a B
 Authorization: Bearer <jwt_token>
 ```
 
-| Scenario | Status | Response body |
-|----------|--------|---------------|
-| Header missing or not `Bearer …` | `401` | `{ "error": { "message": "No token provided", "status": 401 } }` |
-| Token invalid or expired | `403` | `{ "error": { "message": "Invalid or expired token", "status": 403 } }` |
+| Scenario                         | Status | Response body                                                           |
+| -------------------------------- | ------ | ----------------------------------------------------------------------- |
+| Header missing or not `Bearer …` | `401`  | `{ "error": { "message": "No token provided", "status": 401 } }`        |
+| Token invalid or expired         | `403`  | `{ "error": { "message": "Invalid or expired token", "status": 403 } }` |
 
 ---
 
 ### Endpoint Summary
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/` | No | Service info / liveness ping |
-| `GET` | `/health` | No | Gateway health check |
-| `POST` | `/auth/register` | No | Create a new user account |
-| `POST` | `/auth/login` | No | Log in and receive a JWT |
-| `GET` | `/search?query=` | No* | Search products by keyword |
+| Method | Path             | Auth | Description                  |
+| ------ | ---------------- | ---- | ---------------------------- |
+| `GET`  | `/`              | No   | Service info / liveness ping |
+| `GET`  | `/health`        | No   | Gateway health check         |
+| `POST` | `/auth/register` | No   | Create a new user account    |
+| `POST` | `/auth/login`    | No   | Log in and receive a JWT     |
+| `GET`  | `/search?query=` | No\* | Search products by keyword   |
 
 > \* `/search` does not currently enforce the auth middleware, but the middleware is wired and ready. The frontend **should always send the token** for forward compatibility.
 
@@ -882,11 +866,11 @@ Returns basic service metadata. No authentication required.
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `service` | `string` | Always `"Node Gateway"` |
-| `version` | `string` | Semantic version of the gateway |
-| `status` | `string` | Always `"running"` when reachable |
+| Field     | Type     | Description                       |
+| --------- | -------- | --------------------------------- |
+| `service` | `string` | Always `"Node Gateway"`           |
+| `version` | `string` | Semantic version of the gateway   |
+| `status`  | `string` | Always `"running"` when reachable |
 
 ---
 
@@ -913,13 +897,13 @@ Host: localhost:5000
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `status` | `string` | Always `"healthy"` while the process is running |
-| `service` | `string` | Always `"node-gateway"` |
-| `timestamp` | `string` | ISO 8601 UTC time of the response |
-| `uptime` | `number` | Process uptime in seconds (`process.uptime()`) |
-| `environment` | `string` | Value of `NODE_ENV` (e.g. `"development"`) |
+| Field         | Type     | Description                                     |
+| ------------- | -------- | ----------------------------------------------- |
+| `status`      | `string` | Always `"healthy"` while the process is running |
+| `service`     | `string` | Always `"node-gateway"`                         |
+| `timestamp`   | `string` | ISO 8601 UTC time of the response               |
+| `uptime`      | `number` | Process uptime in seconds (`process.uptime()`)  |
+| `environment` | `string` | Value of `NODE_ENV` (e.g. `"development"`)      |
 
 ---
 
@@ -940,10 +924,10 @@ Content-Type: application/json
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `email` | `string` | ✓ | Valid e-mail address |
-| `password` | `string` | ✓ | Non-empty; hashed with bcrypt (cost 10) before storage |
+| Field      | Type     | Required | Notes                                                  |
+| ---------- | -------- | -------- | ------------------------------------------------------ |
+| `email`    | `string` | ✓        | Valid e-mail address                                   |
+| `password` | `string` | ✓        | Non-empty; hashed with bcrypt (cost 10) before storage |
 
 **Response** `201 Created`
 
@@ -956,17 +940,17 @@ Content-Type: application/json
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `message` | `string` | Human-readable confirmation |
+| Field        | Type     | Description                   |
+| ------------ | -------- | ----------------------------- |
+| `message`    | `string` | Human-readable confirmation   |
 | `user.email` | `string` | Echo of the registered e-mail |
 
 **Error responses**
 
-| Status | Condition | Body |
-|--------|-----------|------|
-| `400` | `email` or `password` missing | `{ "error": { "message": "Email and password are required", "status": 400 } }` |
-| `500` | Unexpected server error | `{ "error": { "message": "Registration failed", "status": 500 } }` |
+| Status | Condition                     | Body                                                                           |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------ |
+| `400`  | `email` or `password` missing | `{ "error": { "message": "Email and password are required", "status": 400 } }` |
+| `500`  | Unexpected server error       | `{ "error": { "message": "Registration failed", "status": 500 } }`             |
 
 ---
 
@@ -987,10 +971,10 @@ Content-Type: application/json
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `email` | `string` | ✓ | Must match a registered account |
-| `password` | `string` | ✓ | Plain-text; compared against stored bcrypt hash |
+| Field      | Type     | Required | Notes                                           |
+| ---------- | -------- | -------- | ----------------------------------------------- |
+| `email`    | `string` | ✓        | Must match a registered account                 |
+| `password` | `string` | ✓        | Plain-text; compared against stored bcrypt hash |
 
 **Response** `200 OK`
 
@@ -1002,11 +986,11 @@ Content-Type: application/json
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `message` | `string` | Human-readable confirmation |
-| `token` | `string` | Signed JWT — store in memory or `sessionStorage`; attach to all subsequent requests |
-| `expiresIn` | `string` | Token lifetime. Always `"24h"` |
+| Field       | Type     | Description                                                                         |
+| ----------- | -------- | ----------------------------------------------------------------------------------- |
+| `message`   | `string` | Human-readable confirmation                                                         |
+| `token`     | `string` | Signed JWT — store in memory or `sessionStorage`; attach to all subsequent requests |
+| `expiresIn` | `string` | Token lifetime. Always `"24h"`                                                      |
 
 **Decoded JWT payload**
 
@@ -1030,10 +1014,10 @@ const { token } = response.data;
 
 **Error responses**
 
-| Status | Condition | Body |
-|--------|-----------|------|
-| `400` | `email` or `password` missing | `{ "error": { "message": "Email and password are required", "status": 400 } }` |
-| `500` | Unexpected server error | `{ "error": { "message": "Login failed", "status": 500 } }` |
+| Status | Condition                     | Body                                                                           |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------ |
+| `400`  | `email` or `password` missing | `{ "error": { "message": "Email and password are required", "status": 400 } }` |
+| `500`  | Unexpected server error       | `{ "error": { "message": "Login failed", "status": 500 } }`                    |
 
 ---
 
@@ -1049,15 +1033,15 @@ Host: localhost:5000
 Authorization: Bearer <jwt_token>
 ```
 
-| Query parameter | Type | Required | Notes |
-|-----------------|------|----------|-------|
-| `query` | `string` | ✓ | Non-empty; HTML-escaped by the gateway before forwarding |
+| Query parameter | Type     | Required | Notes                                                    |
+| --------------- | -------- | -------- | -------------------------------------------------------- |
+| `query`         | `string` | ✓        | Non-empty; HTML-escaped by the gateway before forwarding |
 
 **Frontend usage** (`App.js`)
 
 ```javascript
 const response = await axios.get(`${API_URL}/search`, {
-  params: { query: searchQuery }
+  params: { query: searchQuery },
 });
 const products = response.data.results; // rendered as result cards
 ```
@@ -1096,34 +1080,34 @@ const products = response.data.results; // rendered as result cards
 
 **Top-level fields**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `success` | `boolean` | `true` when the collector returned a valid response |
-| `query` | `string` | Echo of the `query` parameter sent by the frontend |
-| `results` | `array` | List of product objects (see schema below) |
-| `cached` | `boolean` | `true` if the response came from the Redis cache |
-| `sources_queried` | `number` | Number of price sources the collector queried |
-| `timestamp` | `string` | ISO 8601 UTC time the gateway assembled the response |
+| Field             | Type      | Description                                          |
+| ----------------- | --------- | ---------------------------------------------------- |
+| `success`         | `boolean` | `true` when the collector returned a valid response  |
+| `query`           | `string`  | Echo of the `query` parameter sent by the frontend   |
+| `results`         | `array`   | List of product objects (see schema below)           |
+| `cached`          | `boolean` | `true` if the response came from the Redis cache     |
+| `sources_queried` | `number`  | Number of price sources the collector queried        |
+| `timestamp`       | `string`  | ISO 8601 UTC time the gateway assembled the response |
 
 **Product object schema** (each item in `results`)
 
-| Field | Type | Description | Frontend renders |
-|-------|------|-------------|-----------------|
-| `name` | `string` | Product title | `<h3>{item.name}</h3>` |
-| `price` | `number` | Price as a decimal number | `<p>${item.price}</p>` |
-| `source` | `string` | Store / scrape-source name | `<p>Source: {item.source}</p>` |
-| `url` | `string` | Direct link to the product listing | — |
-| `currency` | `string` | ISO 4217 code (e.g. `"USD"`) | — |
-| `in_stock` | `boolean` | Stock availability at scrape time | — |
-| `timestamp` | `string` | ISO 8601 UTC time the price was scraped | — |
+| Field       | Type      | Description                             | Frontend renders               |
+| ----------- | --------- | --------------------------------------- | ------------------------------ |
+| `name`      | `string`  | Product title                           | `<h3>{item.name}</h3>`         |
+| `price`     | `number`  | Price as a decimal number               | `<p>${item.price}</p>`         |
+| `source`    | `string`  | Store / scrape-source name              | `<p>Source: {item.source}</p>` |
+| `url`       | `string`  | Direct link to the product listing      | —                              |
+| `currency`  | `string`  | ISO 4217 code (e.g. `"USD"`)            | —                              |
+| `in_stock`  | `boolean` | Stock availability at scrape time       | —                              |
+| `timestamp` | `string`  | ISO 8601 UTC time the price was scraped | —                              |
 
 **Error responses**
 
-| Status | Condition | Body |
-|--------|-----------|------|
-| `400` | `query` param missing or empty | `{ "errors": [{ "msg": "Invalid value", "param": "query", "location": "query" }] }` |
-| `503` | Python Collector is unreachable (`ECONNREFUSED`) | `{ "success": false, "message": "Product collector service unavailable", "error": "Service temporarily down" }` |
-| `500` | Any other gateway error | `{ "success": false, "message": "Failed to fetch products", "error": "<error details>" }` |
+| Status | Condition                                        | Body                                                                                                            |
+| ------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `400`  | `query` param missing or empty                   | `{ "errors": [{ "msg": "Invalid value", "param": "query", "location": "query" }] }`                             |
+| `503`  | Python Collector is unreachable (`ECONNREFUSED`) | `{ "success": false, "message": "Product collector service unavailable", "error": "Service temporarily down" }` |
+| `500`  | Any other gateway error                          | `{ "success": false, "message": "Failed to fetch products", "error": "<error details>" }`                       |
 
 ---
 
