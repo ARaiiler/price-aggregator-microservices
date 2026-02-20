@@ -17,6 +17,15 @@ A production-ready microservices platform for aggregating and comparing product 
 - [Docker Architecture](#docker-architecture)
 - [Environment Configuration](#environment-configuration)
 - [API Documentation](#api-documentation)
+  - [Base URL](#base-url)
+  - [Authentication Header](#authentication-header)
+  - [Endpoint Summary](#endpoint-summary)
+  - [Service Info — GET /](#service-info)
+  - [Health Check — GET /health](#health-check)
+  - [Register — POST /auth/register](#post-authregister)
+  - [Login — POST /auth/login](#post-authlogin)
+  - [Search — GET /search](#get-search)
+  - [Global Error Format](#global-error-format)
 - [Production Notes](#production-notes)
 - [Future Enhancements](#future-enhancements)
 - [License](#license)
@@ -810,12 +819,119 @@ FRONTEND_URL=http://localhost:3000
 
 ## API Documentation
 
-### Authentication Endpoints
+> **Contract Notice** — This section is the official REST API contract between the **React Frontend** (`http://localhost:3000`) and the **Node.js API Gateway** (`http://localhost:5000`). Both sides **must** honour the request/response shapes defined here. Any change to an endpoint path, field name, type, or HTTP status code is a **breaking change** and requires a coordinated update on both sides before merging.
 
-#### Register User
+---
+
+### Base URL
+
+| Environment | URL |
+|-------------|-----|
+| Local development | `http://localhost:5000` |
+| Inside Docker network | `http://node-gateway:5000` |
+
+The frontend resolves the base URL from the `REACT_APP_API_URL` environment variable (defaults to `http://localhost:5000`).
+
+```javascript
+// frontend/src/App.js
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+```
+
+---
+
+### Authentication Header
+
+Protected endpoints require the JWT obtained from `POST /auth/login` sent as a Bearer token:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+| Scenario | Status | Response body |
+|----------|--------|---------------|
+| Header missing or not `Bearer …` | `401` | `{ "error": { "message": "No token provided", "status": 401 } }` |
+| Token invalid or expired | `403` | `{ "error": { "message": "Invalid or expired token", "status": 403 } }` |
+
+---
+
+### Endpoint Summary
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/` | No | Service info / liveness ping |
+| `GET` | `/health` | No | Gateway health check |
+| `POST` | `/auth/register` | No | Create a new user account |
+| `POST` | `/auth/login` | No | Log in and receive a JWT |
+| `GET` | `/search?query=` | No* | Search products by keyword |
+
+> \* `/search` does not currently enforce the auth middleware, but the middleware is wired and ready. The frontend **should always send the token** for forward compatibility.
+
+---
+
+### `GET /`
+
+Returns basic service metadata. No authentication required.
+
+**Response** `200 OK`
+
+```json
+{
+  "service": "Node Gateway",
+  "version": "1.0.0",
+  "status": "running"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `service` | `string` | Always `"Node Gateway"` |
+| `version` | `string` | Semantic version of the gateway |
+| `status` | `string` | Always `"running"` when reachable |
+
+---
+
+### `GET /health`
+
+Live health status of the Node.js Gateway. Used by Docker Compose health checks and the Jenkins pipeline. No authentication required.
+
+**Request**
 
 ```http
-POST /auth/register
+GET /health HTTP/1.1
+Host: localhost:5000
+```
+
+**Response** `200 OK`
+
+```json
+{
+  "status": "healthy",
+  "service": "node-gateway",
+  "timestamp": "2026-02-20T10:00:00.000Z",
+  "uptime": 12345.67,
+  "environment": "development"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | `string` | Always `"healthy"` while the process is running |
+| `service` | `string` | Always `"node-gateway"` |
+| `timestamp` | `string` | ISO 8601 UTC time of the response |
+| `uptime` | `number` | Process uptime in seconds (`process.uptime()`) |
+| `environment` | `string` | Value of `NODE_ENV` (e.g. `"development"`) |
+
+---
+
+### `POST /auth/register`
+
+Create a new user account. A JWT is **not** issued on registration — call `POST /auth/login` afterwards.
+
+**Request**
+
+```http
+POST /auth/register HTTP/1.1
+Host: localhost:5000
 Content-Type: application/json
 
 {
@@ -824,64 +940,129 @@ Content-Type: application/json
 }
 ```
 
-**Response** (201 Created):
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `email` | `string` | ✓ | Valid e-mail address |
+| `password` | `string` | ✓ | Non-empty; hashed with bcrypt (cost 10) before storage |
+
+**Response** `201 Created`
 
 ```json
 {
   "message": "User registered successfully",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-#### Login
-
-```http
-POST /auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "SecureP@ssw0rd"
-}
-```
-
-**Response** (200 OK):
-
-```json
-{
-  "message": "Login successful",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-#### Verify Token
-
-```http
-GET /auth/verify
-Authorization: Bearer {token}
-```
-
-**Response** (200 OK):
-
-```json
-{
-  "valid": true,
   "user": {
     "email": "user@example.com"
   }
 }
 ```
 
-### Product Search Endpoints
+| Field | Type | Description |
+|-------|------|-------------|
+| `message` | `string` | Human-readable confirmation |
+| `user.email` | `string` | Echo of the registered e-mail |
 
-#### Search Products
+**Error responses**
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `400` | `email` or `password` missing | `{ "error": { "message": "Email and password are required", "status": 400 } }` |
+| `500` | Unexpected server error | `{ "error": { "message": "Registration failed", "status": 500 } }` |
+
+---
+
+### `POST /auth/login`
+
+Authenticate with email and password. Returns a signed JWT valid for **24 hours**.
+
+**Request**
 
 ```http
-GET /search?query=laptop
-Authorization: Bearer {token}
+POST /auth/login HTTP/1.1
+Host: localhost:5000
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "SecureP@ssw0rd"
+}
 ```
 
-**Response** (200 OK):
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `email` | `string` | ✓ | Must match a registered account |
+| `password` | `string` | ✓ | Plain-text; compared against stored bcrypt hash |
+
+**Response** `200 OK`
+
+```json
+{
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": "24h"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `message` | `string` | Human-readable confirmation |
+| `token` | `string` | Signed JWT — store in memory or `sessionStorage`; attach to all subsequent requests |
+| `expiresIn` | `string` | Token lifetime. Always `"24h"` |
+
+**Decoded JWT payload**
+
+```json
+{
+  "email": "user@example.com",
+  "userId": "placeholder-id",
+  "iat": 1708258200,
+  "exp": 1708344600
+}
+```
+
+**Frontend usage** (`App.js`)
+
+```javascript
+const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+const { token } = response.data;
+// Attach to protected requests:
+// axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+```
+
+**Error responses**
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `400` | `email` or `password` missing | `{ "error": { "message": "Email and password are required", "status": 400 } }` |
+| `500` | Unexpected server error | `{ "error": { "message": "Login failed", "status": 500 } }` |
+
+---
+
+### `GET /search`
+
+Search for products by keyword. The gateway forwards the query to the internal Python Collector (`POST http://python-collector:8000/internal/search`) and returns the aggregated, normalised results.
+
+**Request**
+
+```http
+GET /search?query=laptop HTTP/1.1
+Host: localhost:5000
+Authorization: Bearer <jwt_token>
+```
+
+| Query parameter | Type | Required | Notes |
+|-----------------|------|----------|-------|
+| `query` | `string` | ✓ | Non-empty; HTML-escaped by the gateway before forwarding |
+
+**Frontend usage** (`App.js`)
+
+```javascript
+const response = await axios.get(`${API_URL}/search`, {
+  params: { query: searchQuery }
+});
+const products = response.data.results; // rendered as result cards
+```
+
+**Response** `200 OK`
 
 ```json
 {
@@ -889,35 +1070,84 @@ Authorization: Bearer {token}
   "query": "laptop",
   "results": [
     {
-      "name": "Laptop - Amazon Edition",
+      "name": "Laptop - Source A Edition",
       "price": 299.99,
-      "source": "Amazon",
-      "url": "https://amazon.com/products/laptop-123",
+      "source": "Source A",
+      "url": "https://source-a.example.com/products/laptop-123",
       "currency": "USD",
       "in_stock": true,
-      "timestamp": "2026-02-18T10:30:00.000Z"
+      "timestamp": "2026-02-20T10:30:00.000Z"
+    },
+    {
+      "name": "Laptop - Source B Edition",
+      "price": 319.99,
+      "source": "Source B",
+      "url": "https://source-b.example.com/products/laptop-456",
+      "currency": "USD",
+      "in_stock": false,
+      "timestamp": "2026-02-20T10:30:01.000Z"
     }
   ],
-  "timestamp": "2026-02-18T10:30:05.000Z",
-  "total_results": 3
+  "cached": false,
+  "sources_queried": 2,
+  "timestamp": "2026-02-20T10:30:05.000Z"
 }
 ```
 
-### Health Check Endpoint
+**Top-level fields**
 
-```http
-GET /health
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | `boolean` | `true` when the collector returned a valid response |
+| `query` | `string` | Echo of the `query` parameter sent by the frontend |
+| `results` | `array` | List of product objects (see schema below) |
+| `cached` | `boolean` | `true` if the response came from the Redis cache |
+| `sources_queried` | `number` | Number of price sources the collector queried |
+| `timestamp` | `string` | ISO 8601 UTC time the gateway assembled the response |
 
-**Response** (200 OK):
+**Product object schema** (each item in `results`)
+
+| Field | Type | Description | Frontend renders |
+|-------|------|-------------|-----------------|
+| `name` | `string` | Product title | `<h3>{item.name}</h3>` |
+| `price` | `number` | Price as a decimal number | `<p>${item.price}</p>` |
+| `source` | `string` | Store / scrape-source name | `<p>Source: {item.source}</p>` |
+| `url` | `string` | Direct link to the product listing | — |
+| `currency` | `string` | ISO 4217 code (e.g. `"USD"`) | — |
+| `in_stock` | `boolean` | Stock availability at scrape time | — |
+| `timestamp` | `string` | ISO 8601 UTC time the price was scraped | — |
+
+**Error responses**
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `400` | `query` param missing or empty | `{ "errors": [{ "msg": "Invalid value", "param": "query", "location": "query" }] }` |
+| `503` | Python Collector is unreachable (`ECONNREFUSED`) | `{ "success": false, "message": "Product collector service unavailable", "error": "Service temporarily down" }` |
+| `500` | Any other gateway error | `{ "success": false, "message": "Failed to fetch products", "error": "<error details>" }` |
+
+---
+
+### Global Error Envelope
+
+All non-validation errors from the gateway use this shape:
 
 ```json
 {
-  "uptime": 12345.67,
-  "message": "OK",
-  "timestamp": 1708258200000,
-  "service": "node-gateway",
-  "environment": "development"
+  "error": {
+    "message": "Human-readable description",
+    "status": 400
+  }
+}
+```
+
+**404 — Route not found**
+
+```json
+{
+  "error": {
+    "message": "Route not found",
+    "status": 404
+  }
 }
 ```
 
