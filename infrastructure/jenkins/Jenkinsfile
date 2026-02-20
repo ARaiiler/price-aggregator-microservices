@@ -127,7 +127,7 @@ pipeline {
         }
     }
     
-    post {
+        post {
         success {
             echo '✅ Pipeline completed successfully!'
         }
@@ -136,7 +136,7 @@ pipeline {
         }
         always {
             echo '🧹 Cleaning up...'
-            sh 'docker image prune -f'
+            sh 'docker image prune -f || true'
         }
     }
 }
