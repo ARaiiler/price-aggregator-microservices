@@ -1,0 +1,48 @@
+.card {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1.4rem 1.7rem;
+  border-radius: 1.25rem;
+  background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent),
+    rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
+}
+
+.heading {
+  font-size: 1.4rem;
+  margin: 0 0 0.25rem;
+  color: #f9fafb;
+}
+
+.subtitle {
+  margin: 0 0 0.8rem;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.infoText {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+.highlight {
+  color: #a5b4fc;
+}
+
+.alertWrapper {
+  margin-bottom: 0.75rem;
+}
+
+.form {
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .card {
+    padding-inline: 2rem;
+  }
+}
+

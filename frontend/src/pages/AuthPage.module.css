@@ -1,0 +1,22 @@
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.switchText {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.link {
+  color: #a5b4fc;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link:hover {
+  color: #c7d2fe;
+}
+
