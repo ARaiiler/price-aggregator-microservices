@@ -1,55 +1,56 @@
 const express = require('express');
-const axios = require('axios');
 const { query, validationResult } = require('express-validator');
+const { searchProducts } = require('../services/pythonService');
+const SearchHistory = require('../models/SearchHistory');
 
 const router = express.Router();
 
-const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || 'http://python-collector:8000';
-
 /**
- * @route   GET /search
- * @desc    Search for products via Python collector service
- * @access  Public (add JWT middleware for production)
+ * GET /search?query=laptop
+ * 🔐 JWT déjà appliqué dans server.js
  */
 router.get(
   '/',
-  [query('query').notEmpty().trim().escape()],
+  [query('query').notEmpty().withMessage('Query is required')],
   async (req, res) => {
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { query: searchQuery } = req.query;
+    const searchQuery = req.query.query;
 
     try {
-      // Call Python collector service
-      const response = await axios.get(`${PYTHON_SERVICE_URL}/fetch-product`, {
-        params: { product_name: searchQuery },
-        timeout: 10000
-      });
+      // ✅ Appel correct vers Python via pythonService
+      const data = await searchProducts(searchQuery);
 
-      res.json({
-        success: true,
-        query: searchQuery,
-        results: response.data.results || [],
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('Search error:', error.message);
-      
-      if (error.code === 'ECONNREFUSED') {
-        return res.status(503).json({
-          success: false,
-          message: 'Product collector service unavailable',
-          error: 'Service temporarily down'
+      // ✅ Sauvegarder dans SearchHistory (optionnel mais bien)
+      try {
+        await SearchHistory.create({
+          userId: req.user.userId,
+          query: searchQuery,
+          providers: data.sources || [],
+          resultCount: data.total_results || 0,
         });
+      } catch (histErr) {
+        console.warn('SearchHistory save failed:', histErr.message);
       }
 
-      res.status(500).json({
+      res.status(200).json({
+        success: true,
+        query: searchQuery,
+        results: data.results || [],
+        sources: data.sources || [],
+        total_results: data.total_results || 0,
+        timestamp: new Date().toISOString(),
+      });
+
+    } catch (error) {
+      console.error('Python service error:', error.message);
+      res.status(503).json({
         success: false,
-        message: 'Failed to fetch products',
-        error: error.message
+        message: 'Product collector service unavailable',
       });
     }
   }
