@@ -37,6 +37,10 @@ _CATALOGUE: Dict[str, list] = {
         {"kw": ["mouse", "souris"], "name": "Gaming Mouse 16K DPI", "base_usd": 59.99, "cur": "USD", "img": "https://via.placeholder.com/150?text=Mouse"},
         {"kw": ["tablet", "ipad", "tablette"], "name": "Tablet Pro 11\"", "base_usd": 499.00, "cur": "USD", "img": "https://via.placeholder.com/150?text=Tablet"},
         {"kw": ["watch", "montre", "smartwatch"], "name": "SmartWatch Series 9", "base_usd": 399.00, "cur": "USD", "img": "https://via.placeholder.com/150?text=Watch"},
+        {"kw": ["tv", "smart tv", "samsung", "lg"], "name": "55\" 4K Smart TV", "base_usd": 599.00, "cur": "USD", "img": "https://via.placeholder.com/150?text=TV"},
+        {"kw": ["playstation", "ps5", "console", "gaming"], "name": "PlayStation 5 Console", "base_usd": 499.99, "cur": "USD", "img": "https://via.placeholder.com/150?text=PS5"},
+        {"kw": ["xbox", "series x", "console", "gaming"], "name": "Xbox Series X", "base_usd": 499.99, "cur": "USD", "img": "https://via.placeholder.com/150?text=Xbox"},
+        {"kw": ["camera", "dslr", "canon", "nikon"], "name": "DSLR Camera Kit", "base_usd": 899.00, "cur": "USD", "img": "https://via.placeholder.com/150?text=Camera"},
     ],
     "Jumia": [
         {"kw": ["laptop", "pc", "computer"], "name": "Laptop Budget 14\"", "base_usd": 420.00, "cur": "MAD", "img": "https://via.placeholder.com/150?text=Laptop"},
@@ -47,6 +51,9 @@ _CATALOGUE: Dict[str, list] = {
         {"kw": ["mouse", "souris"], "name": "Souris Sans Fil 2.4G", "base_usd": 15.00, "cur": "MAD", "img": "https://via.placeholder.com/150?text=Mouse"},
         {"kw": ["tablet", "ipad", "tablette"], "name": "Tablette A8 10.5\"", "base_usd": 220.00, "cur": "MAD", "img": "https://via.placeholder.com/150?text=Tablet"},
         {"kw": ["watch", "montre", "smartwatch"], "name": "Montre Connectée Fit", "base_usd": 75.00, "cur": "MAD", "img": "https://via.placeholder.com/150?text=Watch"},
+        {"kw": ["tv", "smart tv", "samsung", "lg"], "name": "Smart TV 43\" Full HD", "base_usd": 320.00, "cur": "MAD", "img": "https://via.placeholder.com/150?text=TV"},
+        {"kw": ["playstation", "ps5", "console", "gaming"], "name": "Console PS5 Standard", "base_usd": 480.00, "cur": "MAD", "img": "https://via.placeholder.com/150?text=PS5"},
+        {"kw": ["camera", "dslr", "canon", "nikon"], "name": "Appareil Photo Reflex", "base_usd": 650.00, "cur": "MAD", "img": "https://via.placeholder.com/150?text=Camera"},
     ],
     "eBay": [
         {"kw": ["laptop", "pc", "computer"], "name": "Refurb ThinkPad T480", "base_usd": 379.00, "cur": "EUR", "img": "https://via.placeholder.com/150?text=Laptop"},
@@ -57,6 +64,9 @@ _CATALOGUE: Dict[str, list] = {
         {"kw": ["mouse", "souris"], "name": "Ergonomic Vertical Mouse", "base_usd": 34.50, "cur": "EUR", "img": "https://via.placeholder.com/150?text=Mouse"},
         {"kw": ["tablet", "ipad", "tablette"], "name": "Android Tablet 10\"", "base_usd": 189.00, "cur": "EUR", "img": "https://via.placeholder.com/150?text=Tablet"},
         {"kw": ["watch", "montre", "smartwatch"], "name": "Classic Hybrid Watch", "base_usd": 199.00, "cur": "EUR", "img": "https://via.placeholder.com/150?text=Watch"},
+        {"kw": ["tv", "smart tv", "samsung", "lg"], "name": "LED TV 50\" 4K", "base_usd": 540.00, "cur": "EUR", "img": "https://via.placeholder.com/150?text=TV"},
+        {"kw": ["xbox", "series x", "console", "gaming"], "name": "Xbox Series X Bundle", "base_usd": 520.00, "cur": "EUR", "img": "https://via.placeholder.com/150?text=Xbox"},
+        {"kw": ["camera", "dslr", "canon", "nikon"], "name": "Mirrorless Camera Body", "base_usd": 780.00, "cur": "EUR", "img": "https://via.placeholder.com/150?text=Camera"},
     ],
 }
 
@@ -129,13 +139,23 @@ class ProductScraper:
             )
 
             slug = item["name"].lower().replace(" ", "-").replace("\"", "")
+
+            if source == "Amazon":
+                product_url = f"https://www.amazon.com/s?k={slug}"
+            elif source == "Jumia":
+                product_url = f"https://www.jumia.ma/catalog/?q={slug}"
+            elif source == "eBay":
+                product_url = f"https://www.ebay.com/sch/i.html?_nkw={slug}"
+            else:
+                product_url = f"https://{source.lower()}.com/search?q={slug}"
+
             product = Product(
                 id=_product_id(item["name"], source),
                 name=item["name"],
                 price=normalised_price,
                 original_price=original_price,
                 source=source,
-                url=f"https://{source.lower()}.com/dp/{slug}",
+                url=product_url,
                 image_url=item.get("img"),
                 currency=self.normalizer.target,
                 original_currency=original_currency,
