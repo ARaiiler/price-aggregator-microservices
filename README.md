@@ -118,7 +118,7 @@ For comprehensive architecture documentation, see [ARCHITECTURE.md](infrastructu
 | ----------------- | ---------- | ------- | ----------------------------------------- |
 | Frontend          | React      | 18.x    | User interface and client-side logic      |
 | API Gateway       | Express.js | 4.x     | Authentication, routing, rate limiting    |
-| Collector Service | FastAPI    | 0.108+  | Product data aggregation and web scraping |
+| Collector Service | FastAPI    | 0.108+  | Product data aggregation, dummy catalog + live HTTP scraping (DummyJSON), Redis price history |
 | Database          | MongoDB    | 7.0     | Persistent data storage                   |
 | Cache             | Redis      | 7.x     | Session management and query caching      |
 
