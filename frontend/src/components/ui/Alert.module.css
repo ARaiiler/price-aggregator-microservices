@@ -1,0 +1,32 @@
+.alert {
+  border-radius: 0.9rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #fecaca;
+}
+
+.success {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #bbf7d0;
+}
+
+.info {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #bfdbfe;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.body {
+  opacity: 0.95;
+}
+

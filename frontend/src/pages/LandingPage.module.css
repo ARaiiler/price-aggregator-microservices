@@ -1,0 +1,121 @@
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr);
+  gap: 1.75rem;
+  align-items: center;
+}
+
+.content {
+  max-width: 640px;
+}
+
+.title {
+  font-size: 2.1rem;
+  line-height: 1.1;
+  margin: 0 0 0.7rem;
+  color: #f9fafb;
+}
+
+.highlight {
+  background: linear-gradient(to right, #4f46e5, #0ea5e9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.meta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  background: rgba(15, 23, 42, 0.9);
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+}
+
+.panel {
+  display: none;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.25), transparent),
+    rgba(15, 23, 42, 0.98);
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.95);
+  overflow: hidden;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.55rem 0.7rem;
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.8);
+}
+
+.panelBody {
+  padding: 0.8rem 0.9rem 0.9rem;
+}
+
+.panelTitle {
+  margin: 0 0 0.55rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.panelList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.panelList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.6rem;
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.best {
+  color: #bbf7d0;
+}
+
+@media (min-width: 768px) {
+  .hero {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr);
+  }
+
+  .panel {
+    display: block;
+  }
+}
+

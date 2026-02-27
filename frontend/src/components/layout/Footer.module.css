@@ -1,0 +1,38 @@
+.footer {
+  border-top: 1px solid rgba(148, 163, 184, 0.4);
+  background: radial-gradient(circle at top, rgba(37, 99, 235, 0.1), transparent),
+    #020617;
+  padding: 1rem 1.25rem 1.5rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.text {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0 0 0.15rem;
+}
+
+.secondary {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .footer {
+    padding-inline: 2rem;
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
