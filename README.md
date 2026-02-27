@@ -17,6 +17,7 @@ A production-ready microservices platform for aggregating and comparing product 
 - [Docker Architecture](#docker-architecture)
 - [Environment Configuration](#environment-configuration)
 - [API Documentation](#api-documentation)
+- [Node Gateway Documentation](node-gateway/GATEWAY.md)
   - [Base URL](#base-url)
   - [Authentication Header](#authentication-header)
   - [Endpoint Summary](#endpoint-summary)
@@ -818,6 +819,8 @@ FRONTEND_URL=http://localhost:3000
 ---
 
 ## API Documentation
+
+> 📄 For complete Node.js Gateway documentation, see **[node-gateway/GATEWAY.md](node-gateway/GATEWAY.md)**
 
 > **Contract Notice** — This section is the official REST API contract between the **React Frontend** (`http://localhost:3000`) and the **Node.js API Gateway** (`http://localhost:5000`). Both sides **must** honour the request/response shapes defined here. Any change to an endpoint path, field name, type, or HTTP status code is a **breaking change** and requires a coordinated update on both sides before merging.
 
