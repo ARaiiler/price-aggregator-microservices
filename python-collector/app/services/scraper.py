@@ -14,8 +14,6 @@ import random
 from datetime import datetime
 from typing import Dict, List
 
-import httpx
-
 from ..config import get_settings
 from ..models import Product
 from .normalizer import CurrencyNormalizer
@@ -92,9 +90,7 @@ class ProductScraper:
         Search all sources concurrently, normalise prices, return
         a flat sorted list.
         """
-        tasks = [
-            self._scrape_source(source, query) for source in self.sources
-        ]
+        tasks = [self._scrape_source(source, query) for source in self.sources]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         products: List[Product] = []
@@ -103,6 +99,14 @@ class ProductScraper:
                 logger.error("Source scrape failed: %s", res)
                 continue
             products.extend(res)
+
+        # Optional: attempt a minimal live scrape from a public fake store API.
+        # This is best-effort only; if it fails, we still return the catalogue data.
+        try:
+            live_results = await self._scrape_live_source(query)
+            products.extend(live_results)
+        except Exception as exc:
+            logger.warning("Live scrape failed: %s", exc)
 
         # sort by normalised price
         products.sort(key=lambda p: p.price)
@@ -161,6 +165,55 @@ class ProductScraper:
                 original_currency=original_currency,
                 in_stock=random.random() < 0.85,
                 rating=round(random.uniform(3.0, 5.0), 1),
+                timestamp=datetime.utcnow(),
+            )
+            matched.append(product)
+
+        return matched
+
+    async def _scrape_live_source(self, query: str) -> List[Product]:
+        """
+        Very small 'real' scraper using a public fake-store API.
+        This demonstrates HTTP fetching and data transformation without
+        impacting the rest of the system.
+        """
+        import httpx
+
+        query_lower = query.strip().lower()
+        if not query_lower:
+            return []
+
+        async with httpx.AsyncClient(timeout=5) as client:
+            resp = await client.get("https://dummyjson.com/products/search", params={"q": query_lower})
+            resp.raise_for_status()
+            data = resp.json()
+
+        items = data.get("products", [])
+        matched: List[Product] = []
+
+        for item in items:
+            name = item.get("title") or "Unknown product"
+            raw_price_usd = float(item.get("price", 0)) or 0.0
+
+            # Original price is in USD according to the fake API
+            original_currency = "USD"
+            original_price = raw_price_usd
+
+            # Normalise to target currency
+            normalised_price = self.normalizer.convert(original_price, original_currency)
+
+            product = Product(
+                id=str(item.get("id")),
+                name=name,
+                price=normalised_price,
+                original_price=original_price,
+                source="DummyJSON",
+                url=f"https://dummyjson.com/products/{item.get('id')}",
+                image_url=(item.get("thumbnail") or (item.get("images") or [None])[0]),
+                currency=self.normalizer.target,
+                original_currency=original_currency,
+                in_stock=item.get("stock", 0) > 0,
+                rating=float(item.get("rating", 0)) or None,
                 timestamp=datetime.utcnow(),
             )
             matched.append(product)
