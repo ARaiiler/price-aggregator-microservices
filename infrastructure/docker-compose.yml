@@ -78,6 +78,7 @@ services:
       - NODE_ENV=${NODE_ENV:-production}
       - PORT=5000
       - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-changeme-internal-key}
       - MONGO_URI=mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/${MONGO_DATABASE:-priceaggregator}?authSource=admin
       - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379/0
       - PYTHON_SERVICE_URL=http://python-collector:8000
